@@ -39,6 +39,19 @@ interface Trip {
   };
 }
 
+const AVAILABLE_INTERESTS = [
+  "Beaches", "Adventure", "History", "Food & Dining", 
+  "Nightlife", "Shopping", "Nature & Wildlife", "Architecture"
+];
+
+const LOADING_PHRASES = [
+  "Mapping optimal geographic routes...",
+  "Querying local street food hubs and restaurant grids...",
+  "Evaluating climate metrics for structural packing arrays...",
+  "Curating historical landmarks and sightseeing timeline windows...",
+  "Assembling custom pricing profiles and currency allocations..."
+];
+
 export default function Dashboard() {
   const router = useRouter();
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -46,13 +59,22 @@ export default function Dashboard() {
   const [loading, setLoading] = useState<boolean>(true);
   const [newActivityName, setNewActivityName] = useState<string>('');
   const [targetDay, setTargetDay] = useState<number>(1);
+  const [phraseIndex, setPhraseIndex] = useState(0);
 
   // Form input states for creating a new trip
   const [formDest, setFormDest] = useState('');
   const [formDays, setFormDays] = useState(3);
   const [formBudget, setFormBudget] = useState('Medium');
-  const [formInterests, setFormInterests] = useState('');
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
+
+  const handleInterestToggle = (interest: string) => {
+    setSelectedInterests((prev) =>
+      prev.includes(interest)
+        ? prev.filter((i) => i !== interest)
+        : [...prev, interest]
+    );
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -62,6 +84,18 @@ export default function Dashboard() {
     }
     fetchUserTrips();
   }, [router]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (generating) {
+      interval = setInterval(() => {
+        setPhraseIndex((prev) => (prev + 1) % LOADING_PHRASES.length);
+      }, 1500);
+    } else {
+      setPhraseIndex(0); // Reset back to initial phrase
+    }
+    return () => clearInterval(interval);
+  }, [generating]);
 
   const fetchUserTrips = async () => {
     try {
@@ -98,7 +132,7 @@ export default function Dashboard() {
           destination: formDest,
           durationDays: Number(formDays),
           budgetTier: formBudget,
-          interests: formInterests.split(',').map(i => i.trim()).filter(Boolean)
+          interests: selectedInterests
         })
       });
 
@@ -107,7 +141,7 @@ export default function Dashboard() {
         setTrips(prev => [newTrip, ...prev]);
         setSelectedTrip(newTrip);
         setFormDest('');
-        setFormInterests('');
+        setSelectedInterests([]);
       }
     } catch (err) {
       console.error('AI Trip Generation encountered an issue', err);
@@ -291,14 +325,44 @@ export default function Dashboard() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">Interests (Comma Separated)</label>
-                <input
-                  type="text"
-                  placeholder="Food, Architecture, Beach"
-                  value={formInterests}
-                  onChange={(e) => setFormInterests(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
-                />
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                  Select Your Interests
+                </label>
+                
+                {/* The Dropdown selector */}
+                <select
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value && !selectedInterests.includes(value)) {
+                      handleInterestToggle(value);
+                    }
+                    e.target.value = ""; // Reset dropdown view selection
+                  }}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500 text-slate-300 cursor-pointer"
+                >
+                  <option value="">-- Choose an Interest --</option>
+                  {AVAILABLE_INTERESTS.map((interest) => (
+                    <option key={interest} value={interest} disabled={selectedInterests.includes(interest)}>
+                      {interest} {selectedInterests.includes(interest) ? "✓" : ""}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Active Selection Tags Block */}
+                {selectedInterests.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {selectedInterests.map((interest) => (
+                      <span
+                        key={interest}
+                        onClick={() => handleInterestToggle(interest)}
+                        className="flex items-center gap-1 px-2.5 py-1 bg-blue-600/10 border border-blue-500/30 text-blue-400 rounded-lg text-xs font-semibold hover:bg-red-600/20 hover:border-red-500/30 hover:text-red-400 transition cursor-pointer"
+                        title="Click to remove"
+                      >
+                        {interest} <span className="text-[10px] opacity-60">✕</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <button
                 type="submit"
@@ -466,6 +530,31 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+      {generating && (
+            <div className="fixed inset-0 z-50 flex flex-col justify-center items-center bg-slate-950/80 backdrop-blur-md transition-all duration-300">
+              <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center space-y-6 flex flex-col items-center">
+                
+                {/* Smooth Spinning Compass Icon */}
+                <div className="relative flex items-center justify-center h-16 w-16 rounded-full bg-blue-600/10 border border-blue-500/20 text-blue-400 text-3xl animate-spin [animation-duration:3s]">
+                  🧭
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-sm font-black text-white tracking-wider uppercase font-mono animate-pulse">
+                    Invoking Gemini AI Agent Cluster
+                  </h3>
+                  <p className="text-xs text-slate-400 min-h-[32px] px-2 transition-all duration-300 font-medium">
+                    {LOADING_PHRASES[phraseIndex]}
+                  </p>
+                </div>
+                
+                {/* Visual horizontal loading track bar layout indicator */}
+                <div className="w-full bg-slate-950 h-1 rounded-full overflow-hidden border border-slate-800/40">
+                  <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full w-4/5 rounded-full animate-pulse" />
+                </div>
+              </div>
+            </div>
+          )}
     </div>
   );
 }
