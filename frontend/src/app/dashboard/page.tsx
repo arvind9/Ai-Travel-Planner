@@ -153,6 +153,40 @@ export default function Dashboard() {
     }
   };
 
+  const handleDeleteHistory = async (tripId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Stops the dashboard from trying to click/load the trip details
+
+    if (!window.confirm("Are you sure you want to delete this trip from your history?")) {
+    return;
+    }
+
+    try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trips/${tripId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      // Find the state tracking your array of history items and filter out the deleted item.
+      // If your state array is named something else (e.g. savedTrips, tripHistory), change this name:
+      setTrips((prev) => prev.filter((trip: any) => trip._id !== tripId));
+      
+      // Optional: If you delete the trip currently being viewed on screen, clear it out too
+      if (selectedTrip?._id === tripId) {
+        // change this to your active trip state setter if needed (e.g., setUpdatedItinerary(null))
+        setSelectedTrip(null);
+      }
+    } else {
+      alert("Failed to delete history item.");
+    }
+    } catch (error) {
+    console.error("Error deleting record:", error);
+    }
+  };
+
   const togglePackingItem = async (itemId: string) => {
     if (!selectedTrip) return;
 
@@ -276,18 +310,28 @@ export default function Dashboard() {
               <div className="space-y-2">
                 {trips.map((t) => (
                   <button
-                    key={t._id}
-                    onClick={() => setSelectedTrip(t)}
-                    className={`w-full text-left p-3 rounded-xl transition text-xs flex justify-between items-center ${
-                      selectedTrip?._id === t._id ? 'bg-blue-600 text-white font-semibold' : 'bg-slate-950 border border-slate-800 text-slate-300 hover:bg-slate-800'
-                    }`}
-                  >
-                    <div>
-                      <p className="font-bold">{t.destination}</p>
-                      <p className="opacity-70 text-[10px] mt-0.5">{t.durationDays} Days • {t.budgetTier} Budget</p>
-                    </div>
+                  key={t._id}
+                  onClick={() => setSelectedTrip(t)}
+                  className={`w-full text-left p-3 rounded-xl transition text-xs flex justify-between items-center ${
+                    selectedTrip?._id === t._id ? 'bg-blue-600 text-white font-semibold' : 'bg-slate-950 border border-slate-800 text-slate-300 hover:bg-slate-800'
+                  }`}
+                >
+                  <div>
+                    <p className="font-bold">{t.destination}</p>
+                    <p className="opacity-70 text-[10px] mt-0.5">{t.durationDays} Days • {t.budgetTier} Budget</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
                     <span>➡️</span>
-                  </button>
+                    <span
+                      onClick={(e) => handleDeleteHistory(t._id, e)} // <-- FIX: Changed from trip._id to t._id
+                      className="p-1.5 ml-2 bg-red-500/10 hover:bg-red-600 border border-red-500/20 text-red-400 hover:text-white rounded-lg text-xs transition duration-150 cursor-pointer"
+                      title="Delete History"
+                    >
+                      🗑️
+                    </span>
+                  </div>
+                </button>
                 ))}
               </div>
             )}
