@@ -161,8 +161,16 @@ export default function Dashboard() {
     }
 
     try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trips/${tripId}`, {
+      const token = localStorage.getItem('token');
+      
+      // 1. Get the base URL or fallback to localhost if it's missing
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      
+      // 2. Safely trim any trailing slash to avoid double slashes (//api/trips)
+      const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+
+      // 3. Make the network request
+      const response = await fetch(`${cleanBaseUrl}/api/trips/${tripId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
