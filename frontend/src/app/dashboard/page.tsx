@@ -302,23 +302,23 @@ export default function Dashboard() {
               <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="p-2">
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">✈️ Transport</p>
-                  <p className="text-base font-extrabold text-white mt-0.5">${selectedTrip.estimatedBudget.transport}</p>
+                  <p className="text-base font-extrabold text-white mt-0.5">₹{selectedTrip.estimatedBudget.transport}</p>
                 </div>
                 <div className="p-2">
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">🏨 Lodging</p>
-                  <p className="text-base font-extrabold text-white mt-0.5">${selectedTrip.estimatedBudget.accommodation}</p>
+                  <p className="text-base font-extrabold text-white mt-0.5">₹{selectedTrip.estimatedBudget.accommodation}</p>
                 </div>
                 <div className="p-2">
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">🍔 Dining</p>
-                  <p className="text-base font-extrabold text-white mt-0.5">${selectedTrip.estimatedBudget.food}</p>
+                  <p className="text-base font-extrabold text-white mt-0.5">₹{selectedTrip.estimatedBudget.food}</p>
                 </div>
                 <div className="p-2">
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">🎟️ Tickets</p>
-                  <p className="text-base font-extrabold text-white mt-0.5">${selectedTrip.estimatedBudget.activities}</p>
+                  <p className="text-base font-extrabold text-white mt-0.5">₹{selectedTrip.estimatedBudget.activities}</p>
                 </div>
                 <div className="p-2 col-span-2 md:col-span-1 border-t md:border-t-0 md:border-l border-slate-800 md:pl-4">
                   <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">Grand Total</p>
-                  <p className="text-lg font-black text-emerald-400 mt-0.5">${selectedTrip.estimatedBudget.total}</p>
+                  <p className="text-lg font-black text-emerald-400 mt-0.5">₹{selectedTrip.estimatedBudget.total}</p>
                 </div>
               </div>
 

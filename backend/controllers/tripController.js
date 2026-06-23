@@ -26,6 +26,7 @@ exports.generateNewTrip = async (req, res) => {
   const { destination, durationDays, budgetTier, interests } = req.body;
   const userId = req.user.id; // Secured via auth middleware
 
+
   const prompt = `
     Create a detailed travel plan for a ${durationDays}-day trip to ${destination}.
     Budget preference is ${budgetTier}. Interests are: ${interests.join(', ')}.
@@ -36,19 +37,19 @@ exports.generateNewTrip = async (req, res) => {
         {
           "dayNumber": 1,
           "activities": [
-            { "title": "Activity name", "description": "Brief text details", "estimatedCostUSD": 20, "timeOfDay": "Morning" }
+            { "title": "Activity name", "description": "Brief text details", "estimatedCostINR": 1500, "timeOfDay": "Morning" }
           ]
         }
       ],
       "hotels": [
-        { "name": "Recommended Hotel", "tier": "Budget", "estimatedCostNightUSD": 85, "rating": "4.5/5" }
+        { "name": "Recommended Hotel", "tier": "Budget", "estimatedCostNightINR": 4000, "rating": "4.5/5" }
       ],
       "estimatedBudget": {
-        "transport": 120,
-        "accommodation": 300,
-        "food": 150,
-        "activities": 100,
-        "total": 670
+        "transport": 5000,
+        "accommodation": 12000,
+        "food": 6000,
+        "activities": 4000,
+        "total": 27000
       },
       "packingList": [
         { 
@@ -58,7 +59,8 @@ exports.generateNewTrip = async (req, res) => {
         }
       ]
     }
-    Make sure estimates match typical realistic local rates for the specified budgetTier.
+    
+    CRITICAL: All financial calculations, item costs, budgets, and expenses MUST be calculated and returned in Indian Rupees (INR). Do not use US Dollars. Make sure estimates match typical realistic local rates converted to INR for the specified budgetTier.
   `;
 
   try {
