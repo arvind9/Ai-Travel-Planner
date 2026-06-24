@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+// Use next/router here to avoid missing type declarations for next/navigation in some setups
 import { useRouter } from 'next/navigation';
 
 interface Activity {
